@@ -1,0 +1,428 @@
+<header class="cabecalho">
+  <h1 class="logo-couts">COUTS <span>♡</span></h1>
+
+  <nav>
+    @if (modulo() === 'loja') {
+      <a href="#">Início</a>
+      <a href="#produtos">Produtos</a>
+      <a href="#servicos">Serviços</a>
+      <a href="#carrinho">Carrinho ({{ carrinho.quantidadeTotal() }})</a>
+      <a href="#meus-pedidos">Meus pedidos</a>
+      <a href="#cadastro">Cadastro</a>
+      <a href="#" (click)="modulo.set('admin')">Painel administrativo</a>
+    } @else {
+      <a href="#" (click)="modulo.set('loja')">Voltar para a loja</a>
+    }
+  </nav>
+</header>
+
+@if (modulo() === 'admin') {
+  <main>
+    <app-painel-admin />
+  </main>
+} @else {
+  <main>
+
+    <!-- Banner principal -->
+    <section class="banner">
+      <div class="banner-conteudo">
+        <span class="subtitulo-banner">
+          BELEZA • CUIDADO • BEM-ESTAR
+        </span>
+
+        <h2>Sua beleza merece esse carinho!</h2>
+
+        <p>
+          Descubra produtos especiais e serviços de estética
+          para cuidar de você todos os dias.
+        </p>
+
+        <a href="#produtos" class="botao-banner">
+          Conhecer produtos
+        </a>
+      </div>
+
+      <div class="banner-imagem">
+        <img
+          src="https://images.pexels.com/photos/5632335/pexels-photo-5632335.jpeg?auto=compress&dpr=1&h=750&w=1260"
+          alt="Produtos de beleza e cuidados com a pele"
+        />
+      </div>
+    </section>
+
+    <!-- Produtos -->
+    <section id="produtos" class="produtos">
+      <h2>Nossos produtos</h2>
+
+      <!-- BARRA DE PESQUISA E FILTRO DE CATEGORIAS (ADICIONADA) -->
+      <div class="campo-pesquisa">
+        <input
+          type="text"
+          placeholder="Buscar produto por nome..."
+          [value]="pesquisa()"
+          (input)="pesquisa.set($any($event.target).value)"
+        />
+
+        <select
+          [value]="categoriaSelecionada()"
+          (change)="categoriaSelecionada.set($any($event.target).value)"
+        >
+          <option value="">Todas as categorias</option>
+          @for (cat of categorias; track cat) {
+            <option [value]="cat">{{ cat }}</option>
+          }
+        </select>
+      </div>
+
+      @if (carregando()) {
+        <p>Carregando produtos...</p>
+      } @else if (erro()) {
+        <p>{{ erro() }}</p>
+      } @else if (produtosFiltrados.length === 0) {
+        <p>Nenhum produto encontrado nesta categoria.</p>
+        <button type="button" (click)="limparFiltros()">Mostrar todos os produtos</button>
+      } @else {
+        <div class="lista-produtos">
+          @for (produto of produtosFiltrados; track produto.iditem) {
+            <div class="card-produto">
+              <div>
+                <h3>{{ produto.nome }}</h3>
+                <p>{{ produto.descricao }}</p>
+                <p>Categoria: <strong>{{ produto.categoria }}</strong></p>
+
+                <p class="preco">
+                  {{ produto.precoVenda | currency:'BRL' }}
+                </p>
+
+                <p>Estoque: {{ produto.quantidadeEstoque }}</p>
+
+                @if (produto.quantidadeEstoque > 0) {
+                  <span class="mensagem-sucesso">Disponível</span>
+                } @else {
+                  <span class="mensagem-erro">Indisponível</span>
+                }
+              </div>
+
+              <button
+                type="button"
+                class="botao-carrinho"
+                style="margin-top: 15px;"
+                (click)="adicionarProdutoAoCarrinho(produto)"
+                [disabled]="produto.quantidadeEstoque <= 0"
+              >
+                Adicionar ao carrinho
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Serviços -->
+    <section id="servicos" class="produtos">
+      <h2>Nossos serviços</h2>
+
+      @if (mensagemCarrinho()) {
+        <p class="mensagem-carrinho mensagem-sucesso">{{ mensagemCarrinho() }}</p>
+      }
+
+      @if (carregandoServicos()) {
+        <p>Carregando serviços...</p>
+      } @else if (erroServicos()) {
+        <p>{{ erroServicos() }}</p>
+      } @else if (servicos().length === 0) {
+        <p>Nenhum serviço cadastrado.</p>
+      } @else {
+        <div class="lista-produtos">
+          @for (servico of servicos(); track servico.iditem) {
+            <div class="card-produto">
+              <div>
+                <h3>{{ servico.nome }}</h3>
+                <p>{{ servico.descricao }}</p>
+
+                <p class="preco">
+                  {{ servico.preco | currency:'BRL' }}
+                </p>
+
+                <span class="mensagem-sucesso">Serviço disponível</span>
+              </div>
+
+              <button
+                type="button"
+                class="botao-carrinho"
+                style="margin-top: 15px;"
+                (click)="adicionarServicoAoCarrinho(servico)"
+              >
+                Adicionar ao carrinho
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Carrinho -->
+    <section id="carrinho" class="produtos">
+      <h2>Carrinho de compras</h2>
+
+      @if (carrinho.itens().length === 0) {
+        <p>Seu carrinho está vazio.</p>
+      } @else {
+        <div class="lista-carrinho">
+          @for (item of carrinho.itens(); track item.iditem) {
+            <div class="item-carrinho">
+              <h3>{{ item.nome }}</h3>
+              <p>{{ item.tipo === 'produto' ? 'Produto' : 'Serviço' }}</p>
+              <p>Valor unitário: {{ item.preco | currency:'BRL' }}</p>
+
+              @if (item.tipo === 'produto') {
+                <div class="quantidade">
+                  <button
+                    type="button"
+                    (click)="carrinho.alterarQuantidade(item.iditem, item.quantidade - 1)"
+                    [disabled]="item.quantidade <= 1"
+                  >
+                    -
+                  </button>
+
+                  <span>{{ item.quantidade }}</span>
+
+                  <button
+                    type="button"
+                    (click)="carrinho.alterarQuantidade(item.iditem, item.quantidade + 1)"
+                    [disabled]="item.quantidade >= (item.estoque ?? 1)"
+                  >
+                    +
+                  </button>
+                </div>
+              } @else {
+                <p>Quantidade: 1</p>
+              }
+
+              <p>
+                Subtotal: {{ item.preco * item.quantidade | currency:'BRL' }}
+              </p>
+
+              <button
+                type="button"
+                class="btn-danger"
+                (click)="carrinho.remover(item.iditem)"
+              >
+                Remover
+              </button>
+            </div>
+          }
+        </div>
+
+        <p class="total-carrinho">
+          Total: <strong>{{ carrinho.total() | currency:'BRL' }}</strong>
+        </p>
+
+        <div class="formulario-cliente">
+          <label for="cpfPedido">CPF do cliente (somente números)</label>
+
+          <input
+            id="cpfPedido"
+            type="text"
+            placeholder="Digite o CPF cadastrado"
+            [value]="cpfPedido()"
+            (input)="cpfPedido.set($any($event.target).value)"
+          />
+
+          <button
+            type="button"
+            (click)="confirmarPedido()"
+            [disabled]="confirmandoPedido()"
+          >
+            {{ confirmandoPedido() ? 'Confirmando...' : 'Confirmar pedido' }}
+          </button>
+        </div>
+      }
+
+      @if (mensagemPedido()) {
+        <p class="mensagem-sucesso">{{ mensagemPedido() }}</p>
+      }
+
+      @if (erroPedido()) {
+        <p class="mensagem-erro">{{ erroPedido() }}</p>
+      }
+    </section>
+
+    <!-- Meus pedidos -->
+    <section id="meus-pedidos" class="produtos">
+      <h2>Meus pedidos</h2>
+
+      <div class="formulario-cliente">
+        <label for="cpfMeusPedidos">CPF do cliente (somente números)</label>
+
+        <input
+          id="cpfMeusPedidos"
+          type="text"
+          placeholder="Digite o CPF cadastrado"
+          [value]="cpfMeusPedidos()"
+          (input)="cpfMeusPedidos.set($any($event.target).value)"
+        />
+
+        <button
+          type="button"
+          class="btn-ver-pedidos"
+          (click)="buscarMeusPedidos()"
+          [disabled]="carregandoMeusPedidos()"
+        >
+          {{ carregandoMeusPedidos() ? 'Buscando...' : 'Ver meus pedidos' }}
+        </button>
+      </div>
+
+      @if (erroMeusPedidos()) {
+        <p class="mensagem-erro">{{ erroMeusPedidos() }}</p>
+      }
+
+      @if (meusPedidos(); as dados) {
+        <p>Cliente: <strong>{{ dados.nome }}</strong></p>
+
+        @if (dados.pedidos.length === 0) {
+          <p>Este cliente ainda não fez pedidos.</p>
+        } @else {
+          <div class="lista-carrinho">
+            @for (pedido of dados.pedidos; track pedido.idatendimento) {
+              <div class="item-carrinho">
+                <h3>Pedido nº {{ pedido.idatendimento }}</h3>
+
+                <p>
+                  Data: {{ pedido.dataAtendimento | date:'dd/MM/yyyy' }}
+                </p>
+
+                <p>
+                  Situação:
+                  {{ pedido.statusAtendimento === 'A' ? 'Aberto' : pedido.statusAtendimento }}
+                </p>
+
+                <p>
+                  Valor total: {{ pedido.valorTotal | currency:'BRL' }}
+                </p>
+
+                <button
+                  type="button"
+                  (click)="alternarDetalhesPedido(pedido.idatendimento)"
+                >
+                  {{ pedidoAberto() === pedido.idatendimento ? 'Ocultar itens' : 'Ver itens' }}
+                </button>
+
+                @if (pedidoAberto() === pedido.idatendimento) {
+                  <div class="detalhes-pedido">
+                    @for (item of pedido.itens; track item.iditem) {
+                      <p>
+                        {{ item.nomeItem }} —
+                        {{ item.quantidadeItens }} x
+                        {{ item.valorunitarioEntrada | currency:'BRL' }} =
+                        {{ item.valorTotal | currency:'BRL' }}
+                      </p>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+    </section>
+
+    <!-- Cadastro de clientes -->
+    <section id="cadastro" class="produtos">
+      <h2>Cadastro de clientes</h2>
+
+      <form
+        class="formulario-cliente"
+        #formCliente="ngForm"
+        (ngSubmit)="cadastrarCliente()"
+      >
+        <label for="nome">Nome completo</label>
+
+        <input
+          id="nome"
+          type="text"
+          name="nome"
+          [(ngModel)]="cliente.nome"
+          required
+          placeholder="Digite seu nome"
+        />
+
+        <label for="cpf">CPF (somente números)</label>
+
+        <input
+          id="cpf"
+          type="number"
+          name="cpf"
+          [(ngModel)]="cliente.cpf"
+          required
+          min="1"
+        />
+
+        <label for="nascimento">Data de nascimento</label>
+
+        <input
+          id="nascimento"
+          type="date"
+          name="dataNascimento"
+          [(ngModel)]="cliente.dataNascimento"
+          required
+        />
+
+        <label for="sexo">Sexo</label>
+
+        <select
+          id="sexo"
+          name="sexo"
+          [(ngModel)]="cliente.sexo"
+          required
+        >
+          <option value="">Selecione</option>
+          <option value="M">Masculino</option>
+          <option value="F">Feminino</option>
+        </select>
+
+        <label for="email">E-mail</label>
+
+        <input
+          id="email"
+          type="email"
+          name="email"
+          [(ngModel)]="cliente.email"
+          required
+          placeholder="exemplo@email.com"
+        />
+
+        <label for="telefone">Telefone (somente números)</label>
+
+        <input
+          id="telefone"
+          type="number"
+          name="telefone"
+          [(ngModel)]="cliente.telefone"
+          required
+          min="1"
+        />
+
+        <button
+          type="submit"
+          [disabled]="formCliente.invalid || salvandoCliente"
+        >
+          {{ salvandoCliente ? 'Cadastrando...' : 'Cadastrar cliente' }}
+        </button>
+
+        @if (mensagemCliente) {
+          <p class="mensagem-sucesso">{{ mensagemCliente }}</p>
+        }
+
+        @if (erroCliente) {
+          <p class="mensagem-erro">{{ erroCliente }}</p>
+        }
+      </form>
+    </section>
+
+  </main>
+}
+
+<footer>
+  <p>COUTS - Produtos e Estéticas | Atividades 3 e 4</p>
+</footer>

@@ -1,0 +1,976 @@
+<section class="produtos">
+  <h2>Painel administrativo</h2>
+  <h3>Gerenciamento de clientes</h3>
+
+  @if (mensagemPessoa()) {
+    <p class="mensagem-sucesso">{{ mensagemPessoa() }}</p>
+  }
+
+  @if (erroPessoas()) {
+    <p class="mensagem-erro">{{ erroPessoas() }}</p>
+  }
+
+  @if (carregandoPessoas()) {
+    <p>Carregando clientes...</p>
+  } @else if (pessoas().length === 0) {
+    <p>Nenhum cliente cadastrado.</p>
+  } @else {
+    <div class="tabela-estoque">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>E-mail</th>
+            <th>Telefone</th>
+            <th>Sexo</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (pessoa of pessoas(); track pessoa.idpessoa) {
+            <tr>
+              <td>{{ pessoa.idpessoa }}</td>
+              <td>{{ pessoa.nome }}</td>
+              <td>{{ pessoa.cpf }}</td>
+              <td>{{ pessoa.email }}</td>
+              <td>{{ pessoa.telefone }}</td>
+              <td>{{ pessoa.sexo }}</td>
+              <td>
+                <button type="button" class="btn-editar" (click)="editarPessoa(pessoa)">
+                  Editar
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (pessoaEditando()) {
+    <div class="formulario-cliente">
+      <h3>Editar cliente nº {{ pessoaEditando()?.idpessoa }}</h3>
+
+      <label>Nome</label>
+      <input
+        type="text"
+        [value]="dadosEdicao().nome"
+        (input)="atualizarCampo('nome', $any($event.target).value)"
+      />
+
+      <label>CPF</label>
+      <input
+        type="number"
+        [value]="dadosEdicao().cpf"
+        (input)="atualizarCampo('cpf', $any($event.target).value)"
+      />
+
+      <label>Data de nascimento</label>
+      <input
+        type="date"
+        [value]="dadosEdicao().dataNascimento"
+        (input)="atualizarCampo('dataNascimento', $any($event.target).value)"
+      />
+
+      <label>Sexo</label>
+      <select
+        [value]="dadosEdicao().sexo"
+        (change)="atualizarCampo('sexo', $any($event.target).value)"
+      >
+        <option value="M">Masculino</option>
+        <option value="F">Feminino</option>
+      </select>
+
+      <label>E-mail</label>
+      <input
+        type="email"
+        [value]="dadosEdicao().email"
+        (input)="atualizarCampo('email', $any($event.target).value)"
+      />
+
+      <label>Telefone</label>
+      <input
+        type="number"
+        [value]="dadosEdicao().telefone"
+        (input)="atualizarCampo('telefone', $any($event.target).value)"
+      />
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="salvarEdicaoPessoa()"
+        [disabled]="salvandoPessoa()"
+      >
+        {{ salvandoPessoa() ? 'Salvando...' : 'Salvar alterações' }}
+      </button>
+
+      <button type="button" class="btn-secondary" (click)="cancelarEdicaoPessoa()">
+        Cancelar
+      </button>
+    </div>
+  }
+
+
+  <!-- GERENCIAMENTO DE FUNCIONÁRIOS -->
+  <h3>Gerenciamento de funcionários</h3>
+
+  @if (mensagemFuncionario()) {
+    <p class="mensagem-sucesso">{{ mensagemFuncionario() }}</p>
+  }
+
+  @if (erroFuncionarios()) {
+    <p class="mensagem-erro">{{ erroFuncionarios() }}</p>
+  }
+
+  <div class="formulario-cliente">
+    <h4>
+      {{ funcionarioEditando() !== null ? 'Editar funcionário' : 'Cadastrar funcionário' }}
+    </h4>
+
+    <label for="funcNome">Nome</label>
+    <input
+      id="funcNome"
+      type="text"
+      placeholder="Nome completo"
+      [value]="dadosFuncionario().nome"
+      (input)="atualizarCampoFuncionario('nome', $any($event.target).value)"
+    />
+
+    <label for="funcCpf">CPF</label>
+    <input
+      id="funcCpf"
+      type="number"
+      placeholder="CPF"
+      [value]="dadosFuncionario().cpf"
+      (input)="atualizarCampoFuncionario('cpf', $any($event.target).value)"
+    />
+
+    <label for="funcNascimento">Data de nascimento</label>
+    <input
+      id="funcNascimento"
+      type="date"
+      [value]="dadosFuncionario().dataNascimento"
+      (input)="atualizarCampoFuncionario('dataNascimento', $any($event.target).value)"
+    />
+
+    <label for="funcSexo">Sexo</label>
+    <select
+      id="funcSexo"
+      [value]="dadosFuncionario().sexo"
+      (change)="atualizarCampoFuncionario('sexo', $any($event.target).value)"
+    >
+      <option value="">Selecione</option>
+      <option value="M">Masculino</option>
+      <option value="F">Feminino</option>
+    </select>
+
+    <label for="funcEmail">E-mail</label>
+    <input
+      id="funcEmail"
+      type="email"
+      placeholder="E-mail"
+      [value]="dadosFuncionario().email"
+      (input)="atualizarCampoFuncionario('email', $any($event.target).value)"
+    />
+
+    <label for="funcTelefone">Telefone</label>
+    <input
+      id="funcTelefone"
+      type="number"
+      placeholder="Telefone"
+      [value]="dadosFuncionario().telefone"
+      (input)="atualizarCampoFuncionario('telefone', $any($event.target).value)"
+    />
+
+    <label for="funcCargo">Cargo</label>
+    <input
+      id="funcCargo"
+      type="text"
+      placeholder="Cargo do funcionário"
+      [value]="dadosFuncionario().cargo"
+      (input)="atualizarCampoFuncionario('cargo', $any($event.target).value)"
+    />
+
+    <label for="funcAdmissao">Data de admissão</label>
+    <input
+      id="funcAdmissao"
+      type="date"
+      [value]="dadosFuncionario().dataAdmissao"
+      (input)="atualizarCampoFuncionario('dataAdmissao', $any($event.target).value)"
+    />
+
+    <label for="funcAtivo">Situação</label>
+    <select
+      id="funcAtivo"
+      [value]="dadosFuncionario().ativoPessoa"
+      (change)="atualizarCampoFuncionario('ativoPessoa', $any($event.target).value)"
+    >
+      <option value="S">Ativo</option>
+      <option value="N">Inativo</option>
+    </select>
+
+    <h4>Endereços do funcionário</h4>
+
+    @for (endereco of enderecosFuncionario(); track $index; let i = $index) {
+      <div class="formulario-cliente">
+        <h4>Endereço {{ i + 1 }}</h4>
+
+        <label [for]="'funcCep' + i">CEP</label>
+        <input
+          [id]="'funcCep' + i"
+          type="text"
+          placeholder="CEP"
+          [value]="endereco.cep"
+          (input)="atualizarEnderecoFuncionario(i, 'cep', $any($event.target).value)"
+        />
+
+        <label [for]="'funcNumero' + i">Número</label>
+        <input
+          [id]="'funcNumero' + i"
+          type="text"
+          placeholder="Número"
+          [value]="endereco.numero"
+          (input)="atualizarEnderecoFuncionario(i, 'numero', $any($event.target).value)"
+        />
+
+        <label [for]="'funcComplemento' + i">Complemento</label>
+        <input
+          [id]="'funcComplemento' + i"
+          type="text"
+          placeholder="Complemento"
+          [value]="endereco.complemento"
+          (input)="atualizarEnderecoFuncionario(i, 'complemento', $any($event.target).value)"
+        />
+
+        @if (funcionarioEditando() === null && enderecosFuncionario().length > 1) {
+          <button
+            type="button"
+            class="btn-danger"
+            (click)="removerEnderecoFuncionario(i)"
+          >
+            Remover endereço
+          </button>
+        }
+      </div>
+    }
+
+    @if (funcionarioEditando() === null) {
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="adicionarEnderecoFuncionario()"
+      >
+        Adicionar outro endereço
+      </button>
+    }
+
+    <button
+      type="button"
+      class="botao-cadastrar-item"
+      (click)="salvarFuncionario()"
+      [disabled]="salvandoFuncionario()"
+    >
+      {{
+        salvandoFuncionario()
+          ? 'Salvando...'
+          : funcionarioEditando() !== null
+            ? 'Salvar alterações'
+            : 'Cadastrar funcionário'
+      }}
+    </button>
+
+    @if (funcionarioEditando() !== null) {
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="limparFormularioFuncionario()"
+      >
+        Cancelar edição
+      </button>
+    }
+
+  </div>
+
+  <h4>Funcionários cadastrados</h4>
+
+  @if (carregandoFuncionarios()) {
+    <p>Carregando funcionários...</p>
+  } @else if (funcionarios().length === 0) {
+    <p>Nenhum funcionário cadastrado.</p>
+  } @else {
+    <div class="tabela-estoque">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>E-mail</th>
+            <th>Telefone</th>
+            <th>Cargo</th>
+            <th>Admissão</th>
+            <th>Situação</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (funcionario of funcionarios(); track funcionario.pessoaIdpessoa) {
+            <tr>
+              <td>{{ funcionario.pessoaIdpessoa }}</td>
+              <td>{{ funcionario.pessoa.nome }}</td>
+              <td>{{ funcionario.pessoa.cpf }}</td>
+              <td>{{ funcionario.pessoa.email }}</td>
+              <td>{{ funcionario.pessoa.telefone }}</td>
+              <td>{{ funcionario.cargo }}</td>
+              <td>{{ funcionario.dataAdmissao | date:'dd/MM/yyyy' }}</td>
+              <td>
+                {{ funcionario.pessoa.ativoPessoa === 'S' ? 'Ativo' : 'Inativo' }}
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="btn-editar"
+                  (click)="editarFuncionario(funcionario)"
+                >
+                  Editar
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-excluir"
+                  (click)="excluirFuncionario(funcionario.pessoaIdpessoa)"
+                >
+                  Excluir
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+
+  <!-- GERENCIAMENTO DE CATEGORIAS -->
+  <h3>Gerenciamento de categorias</h3>
+
+  @if (mensagemCategoria()) {
+    <p class="mensagem-sucesso">{{ mensagemCategoria() }}</p>
+  }
+
+  @if (erroCategorias()) {
+    <p class="mensagem-erro">{{ erroCategorias() }}</p>
+  }
+
+  <div class="formulario-cliente">
+    <h4>
+      {{ categoriaEditando() !== null ? 'Editar categoria' : 'Cadastrar categoria' }}
+    </h4>
+
+    <label for="nomeCategoria">Nome da categoria</label>
+
+    <input
+      id="nomeCategoria"
+      type="text"
+      placeholder="Digite o nome da categoria"
+      [value]="dadosCategoria().categoria"
+      (input)="atualizarNomeCategoria($any($event.target).value)"
+    />
+
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="salvarCategoria()"
+      [disabled]="salvandoCategoria()"
+    >
+      {{
+        salvandoCategoria()
+          ? 'Salvando...'
+          : categoriaEditando() !== null
+            ? 'Salvar alterações'
+            : 'Cadastrar categoria'
+      }}
+    </button>
+
+    @if (categoriaEditando() !== null) {
+      <button type="button" class="btn-secondary" (click)="cancelarEdicaoCategoria()">
+        Cancelar edição
+      </button>
+    }
+  </div>
+
+  <h4>Categorias cadastradas</h4>
+
+  @if (carregandoCategorias()) {
+    <p>Carregando categorias...</p>
+  } @else if (categorias().length === 0) {
+    <p>Nenhuma categoria cadastrada.</p>
+  } @else {
+    <div class="tabela-estoque">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Categoria</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (categoria of categorias(); track categoria.idcategoria) {
+            <tr>
+              <td>{{ categoria.idcategoria }}</td>
+              <td>{{ categoria.categoria }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="btn-editar"
+                  (click)="editarCategoria(categoria)"
+                >
+                  Editar
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-excluir"
+                  (click)="excluirCategoria(categoria.idcategoria)"
+                >
+                  Excluir
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- GERENCIAMENTO DE PRODUTOS E SERVIÇOS -->
+  <h3>Gerenciamento de produtos e serviços</h3>
+
+  @if (mensagemItem()) {
+    <p class="mensagem-sucesso">{{ mensagemItem() }}</p>
+  }
+
+  @if (erroItens()) {
+    <p class="mensagem-erro">{{ erroItens() }}</p>
+  }
+
+  <div class="formulario-cliente">
+    <h4>
+      {{ itemEditando() !== null ? 'Editar produto ou serviço' : 'Cadastrar produto ou serviço' }}
+    </h4>
+
+    <label for="categoriaItem">Categoria</label>
+    <select
+      id="categoriaItem"
+      [value]="dadosItem().idcategoria"
+      (change)="atualizarCampoItem('idcategoria', $any($event.target).value)"
+    >
+      <option value="0">Selecione uma categoria</option>
+
+      @for (categoria of categorias(); track categoria.idcategoria) {
+        <option [value]="categoria.idcategoria">
+          {{ categoria.categoria }}
+        </option>
+      }
+    </select>
+
+    <label for="nomeItem">Nome</label>
+    <input
+      id="nomeItem"
+      type="text"
+      placeholder="Digite o nome do produto ou serviço"
+      [value]="dadosItem().item1"
+      (input)="atualizarCampoItem('item1', $any($event.target).value)"
+    />
+
+    <label for="descricaoItem">Descrição</label>
+    <textarea
+      id="descricaoItem"
+      placeholder="Digite a descrição"
+      [value]="dadosItem().descricaoItem"
+      (input)="atualizarCampoItem('descricaoItem', $any($event.target).value)"
+    ></textarea>
+
+    <label for="precoItem">Preço de custo/base</label>
+    <input
+      id="precoItem"
+      type="number"
+      min="0.01"
+      step="0.01"
+      [value]="dadosItem().preco"
+      (input)="atualizarCampoItem('preco', $any($event.target).value)"
+    />
+
+    <label for="tipoItem">Tipo</label>
+    <select
+      id="tipoItem"
+      [value]="dadosItem().tipoItem"
+      (change)="atualizarCampoItem('tipoItem', $any($event.target).value)"
+    >
+      <option value="P">Produto</option>
+      <option value="S">Serviço</option>
+    </select>
+
+    @if (dadosItem().tipoItem === 'P') {
+      <label for="precoVenda">Preço de venda</label>
+      <input
+        id="precoVenda"
+        type="number"
+        min="0.01"
+        step="0.01"
+        [value]="dadosItem().precoVenda"
+        (input)="atualizarCampoItem('precoVenda', $any($event.target).value)"
+      />
+
+      <label for="unidadeItem">Unidade</label>
+      <input
+        id="unidadeItem"
+        type="text"
+        placeholder="Ex.: UN, KG, CX"
+        [value]="dadosItem().unidade"
+        (input)="atualizarCampoItem('unidade', $any($event.target).value)"
+      />
+    }
+
+    <label for="ativoItem">Situação</label>
+    <select
+      id="ativoItem"
+      [value]="dadosItem().ativoProdutoServico"
+      (change)="atualizarCampoItem('ativoProdutoServico', $any($event.target).value)"
+    >
+      <option value="S">Ativo</option>
+      <option value="N">Inativo</option>
+    </select>
+
+    <button
+      type="button"
+      class="botao-cadastrar-item"
+      (click)="salvarItem()"
+      [disabled]="salvandoItem()"
+    >
+      {{
+        salvandoItem()
+          ? 'Salvando...'
+          : itemEditando() !== null
+            ? 'Salvar alterações'
+            : 'Cadastrar'
+      }}
+    </button>
+
+    @if (itemEditando() !== null) {
+      <button type="button" class="btn-secondary" (click)="cancelarEdicaoItem()">
+        Cancelar edição
+      </button>
+    }
+  </div>
+
+  <h4>Produtos e serviços cadastrados</h4>
+
+  @if (carregandoItens()) {
+    <p>Carregando produtos e serviços...</p>
+  } @else if (itens().length === 0) {
+    <p>Nenhum produto ou serviço cadastrado.</p>
+  } @else {
+    <div class="tabela-estoque">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Categoria</th>
+            <th>Preço</th>
+            <th>Tipo</th>
+            <th>Preço de venda</th>
+            <th>Unidade</th>
+            <th>Situação</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (item of itens(); track item.iditem) {
+            <tr>
+              <td>{{ item.iditem }}</td>
+              <td>{{ item.item1 }}</td>
+              <td>{{ item.descricaoItem }}</td>
+              <td>{{ nomeDaCategoria(item.idcategoria) }}</td>
+              <td>{{ item.preco | currency:'BRL' }}</td>
+              <td>{{ item.tipoItem === 'P' ? 'Produto' : 'Serviço' }}</td>
+              <td>{{ item.precoVenda | currency:'BRL' }}</td>
+              <td>{{ item.unidade }}</td>
+              <td>{{ item.ativoProdutoServico === 'S' ? 'Ativo' : 'Inativo' }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="btn-editar"
+                  (click)="editarItem(item)"
+                >
+                  Editar
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-excluir"
+                  (click)="excluirItem(item.iditem!)"
+                >
+                  Excluir
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- CONSULTA DE ESTOQUE -->
+  <h4>Consulta de estoque</h4>
+
+  <div class="formulario-cliente">
+    <label for="idBusca">Pesquisar pelo ID do item</label>
+    <input
+      id="idBusca"
+      type="text"
+      placeholder="Digite o ID do item"
+      [value]="idBusca()"
+      (input)="idBusca.set($any($event.target).value)"
+    />
+
+    <button type="button" class="btn-primary" (click)="buscarPorId()" [disabled]="buscando()">
+      {{ buscando() ? 'Buscando...' : 'Pesquisar' }}
+    </button>
+
+    <button type="button" class="btn-secondary" (click)="limparBusca()">Limpar</button>
+  </div>
+
+  @if (erroBusca()) {
+    <p class="mensagem-erro">{{ erroBusca() }}</p>
+  }
+
+  @if (resultadoBusca(); as item) {
+    <div class="item-carrinho">
+      <h3>{{ item.item }} (ID {{ item.iditem }})</h3>
+      <p>{{ item.descricaoItem }}</p>
+      <p>Categoria: {{ item.categoria }}</p>
+      <p>Preço: {{ item.preco | currency:'BRL' }}</p>
+      <p>Preço de venda: {{ item.precoVenda | currency:'BRL' }} ({{ item.unidade }})</p>
+      <p>Quantidade em estoque: {{ item.quantidadeEstoque }}</p>
+      <p>Ativo: {{ item.ativo === 'S' ? 'Sim' : 'Não' }}</p>
+    </div>
+  }
+
+  <h3>Todos os produtos</h3>
+
+  @if (carregandoEstoque()) {
+    <p>Carregando estoque...</p>
+  } @else if (erroEstoque()) {
+    <p class="mensagem-erro">{{ erroEstoque() }}</p>
+  } @else if (estoque().length === 0) {
+    <p>Nenhum produto no estoque.</p>
+  } @else {
+    <div class="tabela-estoque">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Item</th>
+            <th>Descrição</th>
+            <th>Categoria</th>
+            <th>Preço</th>
+            <th>Preço de venda</th>
+            <th>Un.</th>
+            <th>Estoque</th>
+            <th>Ativo</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of estoque(); track item.iditem) {
+            <tr>
+              <td>{{ item.iditem }}</td>
+              <td>{{ item.item }}</td>
+              <td>{{ item.descricaoItem }}</td>
+              <td>{{ item.categoria }}</td>
+              <td>{{ item.preco | currency:'BRL' }}</td>
+              <td>{{ item.precoVenda | currency:'BRL' }}</td>
+              <td>{{ item.unidade }}</td>
+              <td>{{ item.quantidadeEstoque }}</td>
+              <td>{{ item.ativo === 'S' ? 'Sim' : 'Não' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <h3>Entrada de produtos</h3>
+
+  <div class="formulario-cliente">
+    <label for="entProduto">Produto</label>
+    <select
+      id="entProduto"
+      [value]="entIditem()"
+      (change)="selecionarProdutoEntrada($any($event.target).value)"
+    >
+      <option value="">Selecione o produto</option>
+
+      @for (produto of estoque(); track produto.iditem) {
+        <option [value]="produto.iditem">
+          {{ produto.item }} (ID {{ produto.iditem }})
+        </option>
+      }
+    </select>
+
+    <label for="entData">Data da entrada</label>
+    <input
+      id="entData"
+      type="date"
+      [value]="entData()"
+      (input)="entData.set($any($event.target).value)"
+    />
+
+    <label for="entQuantidade">Quantidade recebida</label>
+    <input
+      id="entQuantidade"
+      type="number"
+      min="1"
+      step="1"
+      [value]="entQuantidade()"
+      (input)="entQuantidade.set($any($event.target).value)"
+    />
+
+    <label for="entUnidade">Unidade</label>
+    <input
+      id="entUnidade"
+      type="text"
+      placeholder="Ex.: UN"
+      [value]="entUnidade()"
+      (input)="entUnidade.set($any($event.target).value)"
+    />
+
+    <label for="entValor">Valor unitário de entrada</label>
+    <input
+      id="entValor"
+      type="number"
+      min="0.01"
+      step="0.01"
+      [value]="entValor()"
+      (input)="entValor.set($any($event.target).value)"
+    />
+
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="registrarEntrada()"
+      [disabled]="salvandoEntrada()"
+    >
+      {{ salvandoEntrada() ? 'Registrando...' : 'Registrar entrada' }}
+    </button>
+
+    <button type="button" class="btn-secondary" (click)="limparEntrada()">Limpar</button>
+
+    @if (mensagemEntrada()) {
+      <p class="mensagem-sucesso">{{ mensagemEntrada() }}</p>
+    }
+
+    @if (erroEntrada()) {
+      <p class="mensagem-erro">{{ erroEntrada() }}</p>
+    }
+  </div>
+
+  <h3>Entradas registradas</h3>
+
+  @if (erroEntradas()) {
+    <p class="mensagem-erro">{{ erroEntradas() }}</p>
+  } @else if (entradas().length === 0) {
+    <p>Nenhuma entrada registrada.</p>
+  } @else {
+    <div class="tabela-estoque">
+      <table>
+        <thead>
+          <tr>
+            <th>Nº</th>
+            <th>Produto</th>
+            <th>Data</th>
+            <th>Quantidade</th>
+            <th>Un.</th>
+            <th>Valor unitário</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entrada of entradas(); track entrada.identradaProduto) {
+            <tr>
+              <td>{{ entrada.identradaProduto }}</td>
+              <td>{{ nomeDoItem(entrada.iditem) }}</td>
+              <td>{{ entrada.dataEntradaProduto | date:'dd/MM/yyyy' }}</td>
+              <td>{{ entrada.quantidadeEntrada }}</td>
+              <td>{{ entrada.unidade }}</td>
+              <td>{{ entrada.valorUnitarioEntrada | currency:'BRL' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <h3>Pedidos</h3>
+
+  <div class="formulario-cliente">
+    <label for="filtroPedidos">Mostrar pedidos</label>
+    <select
+      id="filtroPedidos"
+      [value]="filtroStatus()"
+      (change)="mudarFiltro($any($event.target).value)"
+    >
+      <option value="">Todos</option>
+      <option value="Aberto">Em aberto</option>
+      <option value="Em processamento">Em processamento</option>
+      <option value="Concluído">Concluídos</option>
+      <option value="Cancelado">Cancelados</option>
+    </select>
+  </div>
+
+  <div class="formulario-cliente">
+    <label for="idPedidoBusca">Abrir pedido pelo número</label>
+    <input
+      id="idPedidoBusca"
+      type="text"
+      placeholder="Digite o número do pedido"
+      [value]="idPedidoBusca()"
+      (input)="idPedidoBusca.set($any($event.target).value)"
+    />
+
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="buscarPedidoPorId()"
+      [disabled]="buscandoPedido()"
+    >
+      {{ buscandoPedido() ? 'Buscando...' : 'Abrir pedido' }}
+    </button>
+
+    <button type="button" class="btn-secondary" (click)="limparBuscaPedido()">Limpar</button>
+  </div>
+
+  @if (mensagemPedidosAdmin()) {
+    <p class="mensagem-sucesso">{{ mensagemPedidosAdmin() }}</p>
+  }
+
+  @if (erroPedidosAdmin()) {
+    <p class="mensagem-erro">{{ erroPedidosAdmin() }}</p>
+  }
+
+  @if (erroPedidoBusca()) {
+    <p class="mensagem-erro">{{ erroPedidoBusca() }}</p>
+  }
+
+  @if (resultadoPedido(); as pedidoBuscado) {
+    <h3>Resultado da pesquisa</h3>
+    <ng-container
+      [ngTemplateOutlet]="cartaoPedido"
+      [ngTemplateOutletContext]="{ $implicit: pedidoBuscado }"
+    ></ng-container>
+  }
+
+  @if (carregandoPedidos()) {
+    <p>Carregando pedidos...</p>
+  } @else if (erroPedidos()) {
+    <p class="mensagem-erro">{{ erroPedidos() }}</p>
+  } @else if (pedidos().length === 0) {
+    <p>Nenhum pedido encontrado para essa situação.</p>
+  } @else {
+    <div class="lista-carrinho">
+      @for (pedido of pedidos(); track pedido.idatendimento) {
+        <ng-container
+          [ngTemplateOutlet]="cartaoPedido"
+          [ngTemplateOutletContext]="{ $implicit: pedido }"
+        ></ng-container>
+      }
+    </div>
+  }
+
+ <!-- Modelo do cartão de um pedido -->
+ <ng-template #cartaoPedido let-pedido>
+  <div style="
+    background: #ffffff;
+    border: 1px solid #f8d9e7;
+    border-radius: 16px;
+    padding: 24px;
+    margin: 20px auto;
+    max-width: 560px;
+    box-shadow: 0 4px 14px rgba(168, 63, 112, 0.08);
+    text-align: center;
+  ">
+    <h3 style="color: #a83f70; margin: 0 0 12px 0; font-size: 20px;">
+      Pedido nº {{ pedido.idatendimento }}
+    </h3>
+    <p style="margin: 6px 0;">Cliente: {{ pedido.nomeCliente }} (ID {{ pedido.idpessoa }})</p>
+    <p style="margin: 6px 0;">Data: {{ pedido.dataAtendimento | date:'dd/MM/yyyy' }}</p>
+    <p style="margin: 6px 0;">Situação: <strong>{{ pedido.statusDescricao }}</strong></p>
+    <p style="margin: 6px 0 18px 0;">Valor total: {{ pedido.valorTotal | currency:'BRL' }}</p>
+
+    <div style="
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      width: 100%;
+    ">
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="alternarItensPedido(pedido.idatendimento)"
+      >
+        {{ pedidoExpandido() === pedido.idatendimento ? 'Ocultar itens' : 'Ver itens' }}
+      </button>
+
+      @for (acao of proximasSituacoes(pedido.statusAtendimento); track acao.valor) {
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="mudarStatus(pedido, acao.valor)"
+          [disabled]="alterandoStatus()"
+        >
+          {{ acao.rotulo }}
+        </button>
+      }
+    </div>
+
+    @if (pedidoExpandido() === pedido.idatendimento) {
+      <div class="tabela-estoque" style="margin-top: 18px; overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Qtd.</th>
+              <th>Valor unitário</th>
+              <th>Total</th>
+              <th>Funcionário</th>
+              <th>Cargo</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of pedido.itens; track item.iditem) {
+              <tr>
+                <td>{{ item.nomeItem }}</td>
+                <td>{{ item.quantidadeItens }}</td>
+                <td>{{ item.valorunitarioEntrada | currency:'BRL' }}</td>
+                <td>{{ item.valorTotal | currency:'BRL' }}</td>
+                <td>{{ item.funcionario }}</td>
+                <td>{{ item.cargo }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</ng-template>
+</section>
